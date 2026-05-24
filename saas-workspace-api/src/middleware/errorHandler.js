@@ -77,27 +77,45 @@ function handlePrismaError(err, res) {
     case 'P2002': {
       // Unique constraint violation
       const field = err.meta?.target?.join(', ') || 'field';
+      const readableField = field
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .join(' and ');
+
       return res.status(409).json({
         success: false,
-        error: { message: `A record with this ${field} already exists`, code: 'CONFLICT' },
+        error: {
+          message: `A record with this ${readableField} already exists. Use a different ${readableField} and try again.`,
+          code: 'CONFLICT',
+        },
       });
     }
     case 'P2025':
       // Record not found (e.g. update/delete on missing record)
       return res.status(404).json({
         success: false,
-        error: { message: 'Record not found', code: 'NOT_FOUND' },
+        error: {
+          message: 'The requested record could not be found. It may have been deleted already.',
+          code: 'NOT_FOUND',
+        },
       });
     case 'P2003':
       return res.status(400).json({
         success: false,
-        error: { message: 'Referenced record does not exist', code: 'FOREIGN_KEY_VIOLATION' },
+        error: {
+          message: 'One of the linked records does not exist. Check the related IDs and try again.',
+          code: 'FOREIGN_KEY_VIOLATION',
+        },
       });
     default:
       logger.error({ err }, 'Unhandled Prisma error');
       return res.status(500).json({
         success: false,
-        error: { message: 'Database error', code: 'DB_ERROR' },
+        error: {
+          message: 'The database could not process this request. Please try again later.',
+          code: 'DB_ERROR',
+        },
       });
   }
 }
