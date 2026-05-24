@@ -620,6 +620,7 @@ After running `npm run db:seed`:
 | MEMBER | carol@example.com | Password1 |
 
 ---
->  **Built for Learning** — This codebase is intentionally written as a learning resource.
+##Built for Learning :
+>  This codebase is intentionally written as a learning resource.
 > Every non-trivial decision has an inline comment explaining **why**, not just **what**.
 > Great for developers learning JWT auth, RBAC, and production backend patterns.
