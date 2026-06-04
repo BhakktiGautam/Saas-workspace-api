@@ -72,6 +72,40 @@ router.post(
  *     summary: List projects in an organization (all roles)
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orgId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, minimum: 1, default: 1 }
+ *         description: One-based page number.
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+ *         description: Maximum projects returned per page.
+ *     responses:
+ *       200:
+ *         description: Paginated list of projects
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: array
+ *                   items: { type: object }
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     page: { type: integer, example: 1 }
+ *                     limit: { type: integer, example: 10 }
+ *                     total: { type: integer, example: 50 }
+ *                     totalPages: { type: integer, example: 5 }
+ *       422:
+ *         description: Invalid pagination query parameters
  */
 router.get('/', validate(paginationSchema, 'query'), projectController.listProjects);
 
