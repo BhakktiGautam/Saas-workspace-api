@@ -59,7 +59,7 @@ async function login({ email, password }) {
   const user = await prisma.user.findUnique({ where: { email } });
 
   // Use constant-time comparison to prevent user enumeration
-  const dummyHash = '$2a$12$invalid.hash.to.prevent.timing.attacks.xxxxxxxxx';
+  const dummyHash = '$2a$12$e.Knxl.tUMOxrRlh.hxK1OBgm80k4PrGPeseF0pauqeRIcyy9eovy';
   const passwordValid = await bcrypt.compare(
     password,
     user ? user.passwordHash : dummyHash
