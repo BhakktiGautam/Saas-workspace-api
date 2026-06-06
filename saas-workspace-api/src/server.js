@@ -50,10 +50,15 @@ async function shutdown(signal) {
   if (server) {
     server.close(async () => {
       logger.info('HTTP server closed');
-      await prisma.$disconnect();
-      await redis.disconnect();
-      logger.info('All connections closed. Exiting.');
-      process.exit(0);
+      try {
+        await prisma.$disconnect();
+        await redis.disconnect();
+        logger.info('All connections closed. Exiting.');
+        process.exit(0);
+      } catch (cleanupErr) {
+        logger.error({ err: cleanupErr }, 'Error during database disconnection');
+        process.exit(1);
+      }
     });
 
     // Force exit after 10 seconds
