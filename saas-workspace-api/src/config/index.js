@@ -68,7 +68,8 @@ const config = {
   rateLimit: {
     windowMs: optionalInt('RATE_LIMIT_WINDOW_MS', 15 * 60 * 1000), // 15 min
     maxRequests: optionalInt('RATE_LIMIT_MAX_REQUESTS', 100),
-    authMaxRequests: optionalInt('AUTH_RATE_LIMIT_MAX', 10),
+    authWindowMs: optionalInt('AUTH_RATE_LIMIT_WINDOW_MS', 5 * 60 * 1000), // 5 min
+    authMaxRequests: optionalInt('AUTH_RATE_LIMIT_MAX', 5),
   },
 
   cors: {

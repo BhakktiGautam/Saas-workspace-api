@@ -29,7 +29,7 @@ const apiLimiter = rateLimit({
 });
 
 const authLimiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
+  windowMs: config.rateLimit.authWindowMs,
   max: config.rateLimit.authMaxRequests, // Much stricter for auth
   standardHeaders: true,
   legacyHeaders: false,
