@@ -15,7 +15,6 @@
  */
 
 const { Prisma } = require('@prisma/client');
-const { AppError } = require('../utils/errors');
 const logger = require('../utils/logger');
 const config = require('../config');
 

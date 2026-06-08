@@ -90,7 +90,7 @@ async function login({ email, password }) {
 
 async function refreshTokens(rawRefreshToken) {
   // Verify JWT signature first (cheap check before DB hit)
-  const decoded = verifyRefreshToken(rawRefreshToken);
+  verifyRefreshToken(rawRefreshToken);
 
   // Load the stored token record
   const stored = await prisma.refreshToken.findUnique({
