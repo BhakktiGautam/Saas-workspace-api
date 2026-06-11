@@ -1,4 +1,4 @@
-# 🏗️ Architecture
+#   Architecture
 
 ## Overview
 
@@ -6,13 +6,13 @@ SaaS Workspace API is a production-ready backend built using modern SaaS archite
 
 ### Features
 
-* 🔐 JWT Authentication & Authorization
-* ♻️ Refresh Token Rotation
-* ⚡ Redis Caching & Token Blacklisting
-* 👥 Role-Based Access Control (RBAC)
-* 🏢 Multi-Tenant Organization Management
-* 🧠 Service Layer Architecture
-* 🐘 PostgreSQL with Prisma ORM
+*   JWT Authentication & Authorization
+*   Refresh Token Rotation
+*   Redis Caching & Token Blacklisting
+*   Role-Based Access Control (RBAC)
+*   Multi-Tenant Organization Management
+*   Service Layer Architecture
+*   PostgreSQL with Prisma ORM
 
 ### Architecture Flow
 
@@ -30,30 +30,30 @@ The application follows a layered architecture that promotes scalability, mainta
 flowchart TB
 
     %% ===== Client Layer =====
-    Client["🖥️ Client Application"]
+    Client["Client Application"]
 
     %% ===== Backend =====
-    subgraph Backend["🚀 Express Backend"]
+    subgraph Backend["Express Backend"]
         direction TB
 
-        Express["⚡ Express Server"]
+        Express["Express Server"]
 
-        subgraph API["🌐 API Layer"]
+        subgraph API["API Layer"]
             direction LR
-            Middleware["🔒 Middleware"]
-            Routes["🛣️ Routes"]
-            Controllers["🎯 Controllers"]
+            Middleware["Middleware"]
+            Routes["Routes"]
+            Controllers["Controllers"]
         end
 
-        subgraph Business["⚙️ Business Logic"]
-            Services["🧠 Services"]
+        subgraph Business["Business Logic"]
+            Services["Services"]
         end
 
-        subgraph Data["💾 Data Layer"]
+        subgraph Data["Data Layer"]
             direction LR
-            Prisma["🔷 Prisma ORM"]
-            PostgreSQL[("🐘 PostgreSQL")]
-            Redis[("⚡ Redis Cache")]
+            Prisma["Prisma ORM"]
+            PostgreSQL[("PostgreSQL")]
+            Redis[("Redis Cache")]
         end
     end
 
@@ -98,12 +98,12 @@ flowchart TB
 sequenceDiagram
     autonumber
 
-    participant Client as 🖥️ Client
-    participant Route as 🛣️ Route
-    participant Middleware as 🔒 Middleware
-    participant Controller as 🎯 Controller
-    participant Service as 🧠 Service
-    participant Database as 🐘 PostgreSQL
+    participant Client as Client
+    participant Route as Route
+    participant Middleware as Middleware
+    participant Controller as Controller
+    participant Service as Service
+    participant Database as PostgreSQL
 
     Client->>Route: HTTP Request
     Route->>Middleware: Validate & Authenticate
@@ -145,43 +145,43 @@ Example:
 
 Handles security, validation, and request processing.
 
-### 🔐 Authentication
+###  Authentication
 
 * JWT verification
 * User identification
 * Token blacklist checks
 
-### 👥 Authorization
+###  Authorization
 
 * Role validation
 * Permission checks
 * Organization access control
 
-### ✅ Validation
+###  Validation
 
 * Joi schema validation
 * Input sanitization
 * Request validation
 
-### 🛡️ Security
+###  Security
 
 * Rate limiting
 * Helmet headers
 * CORS protection
 
-### ⚡ Performance
+###  Performance
 
 * Redis caching
 * Optimized request handling
 
-### 📊 Monitoring
+###  Monitoring
 
 * Request logging
 * Error tracking
 
 ---
 
-## 🎯 Controllers Layer
+##  Controllers Layer
 
 Controllers serve as the API entry point, handling HTTP requests and responses.
 
@@ -196,7 +196,7 @@ Controllers serve as the API entry point, handling HTTP requests and responses.
 
 ---
 
-## 🧠 Services Layer
+##  Services Layer
 
 Services encapsulate the application's core business logic.
 
@@ -217,7 +217,7 @@ Services encapsulate the application's core business logic.
 
 ---
 
-## 💾 Database Layer
+##  Database Layer
 
 All database interactions are managed through Prisma ORM.
 
