@@ -56,5 +56,13 @@ async function getMe(req, res, next) {
     return next(err);
   }
 }
+async function verifyEmail(req, res, next) {
+  try {
+    const result = await authService.verifyEmail(req.params.token);
+    return sendSuccess(res, result);
+  } catch (err) {
+    return next(err);
+  }
+}
 
-module.exports = { signup, login, refresh, logout, getMe };
+module.exports = { signup, login, refresh, logout, getMe, verifyEmail };

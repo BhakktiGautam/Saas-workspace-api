@@ -20,6 +20,8 @@ const config = require('../config');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { ConflictError, AuthenticationError, NotFoundError } = require('../utils/errors');
 const logger = require('../utils/logger');
+const { v4: uuidv4 } = require('uuid');
+const { sendVerificationEmail } = require('../utils/email');
 
 // Parse e.g. "7d" → milliseconds
 function parseDurationToMs(duration) {
@@ -41,13 +43,31 @@ async function signup({ firstName, lastName, email, password }) {
 
   // Hash password
   const passwordHash = await bcrypt.hash(password, config.bcrypt.rounds);
+  // Generate a verification token and set its expiry
+  const verificationToken = uuidv4();
+  const tokenExpiry = new Date(Date.now() + config.email.verificationTokenExpiryHours * 3600000);
+
 
   const user = await prisma.user.create({
-    data: { firstName, lastName, email, passwordHash },
+    data: { 
+      firstName, 
+      lastName, 
+      email, 
+      passwordHash,
+      isEmailVerified: false,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpiry: tokenExpiry,
+    },
     select: { id: true, email: true, firstName: true, lastName: true, createdAt: true },
   });
 
   logger.info({ userId: user.id, email: user.email }, 'User signed up');
+
+  // Send verification email (fire-and-forget — don't block signup if email fails)
+  sendVerificationEmail(email, verificationToken).catch((err) =>
+    logger.error({ err, email }, 'Failed to send verification email')
+  );
+
 
   const tokens = await generateTokenPair(user);
   return { user, ...tokens };
@@ -72,6 +92,13 @@ async function login({ email, password }) {
   if (!user.isActive) {
     throw new AuthenticationError('Account is deactivated', 'ACCOUNT_DEACTIVATED');
   }
+  if (!user.isEmailVerified) {
+    throw new AuthenticationError(
+      'Please verify your email before logging in',
+      'EMAIL_NOT_VERIFIED'
+    );
+  }
+
 
   logger.info({ userId: user.id }, 'User logged in');
 
@@ -140,6 +167,40 @@ async function logout(accessToken, refreshToken, userId) {
   logger.info({ userId }, 'User logged out');
 }
 
+// ─── Verify Email ─────────────────────────────────────────────
+
+async function verifyEmail(token) {
+  // Find the user who has this verification token
+  const user = await prisma.user.findUnique({
+    where: { emailVerificationToken: token },
+  });
+
+  if (!user) {
+    throw new NotFoundError('Invalid verification token');
+  }
+
+  if (user.emailVerificationExpiry < new Date()) {
+    throw new AuthenticationError('Verification token has expired', 'TOKEN_EXPIRED');
+  }
+
+  if (user.isEmailVerified) {
+    return { message: 'Email is already verified' };
+  }
+
+  // Mark as verified and clear the token (so it can't be used again)
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      isEmailVerified: true,
+      emailVerificationToken: null,
+      emailVerificationExpiry: null,
+    },
+  });
+
+  logger.info({ userId: user.id }, 'Email verified');
+  return { message: 'Email verified successfully' };
+}
+
 // ─── Get Me ───────────────────────────────────────────────────
 
 async function getMe(userId) {
@@ -180,4 +241,4 @@ async function generateTokenPair(user) {
   return { accessToken, refreshToken: rawRefreshToken };
 }
 
-module.exports = { signup, login, refreshTokens, logout, getMe };
+module.exports = { signup, login, refreshTokens, logout, getMe, verifyEmail };

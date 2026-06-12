@@ -86,6 +86,19 @@ const config = {
     level: optional('LOG_LEVEL', 'info'),
     pretty: optionalBool('LOG_PRETTY', true),
   },
+
+  email: {
+    host: optional('EMAIL_HOST', ''),
+    port: optionalInt('EMAIL_PORT', 587),
+    user: optional('EMAIL_USER', ''),
+    pass: optional('EMAIL_PASS', ''),
+    from: optional('EMAIL_FROM', 'noreply@saasworkspace.com'),
+    verificationTokenExpiryHours: optionalInt('EMAIL_VERIFICATION_EXPIRY_HOURS', 24)
+  },
+
+  app: {
+    baseUrl: optional('APP_BASE_URL', 'http://localhost:3000'),
+  }
 };
 
 module.exports = config;
