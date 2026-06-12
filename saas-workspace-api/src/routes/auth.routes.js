@@ -128,5 +128,25 @@ router.post('/logout', authenticate, authController.logout);
  *         description: Not authenticated
  */
 router.get('/me', authenticate, authController.getMe);
+/**
+ * @openapi
+ * /auth/verify-email/{token}:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Verify user's email address
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       404:
+ *         description: Invalid verification token
+ */
+router.get('/verify-email/:token', authController.verifyEmail);
 
 module.exports = router;
