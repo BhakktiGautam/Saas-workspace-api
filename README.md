@@ -27,7 +27,7 @@ This project is part of **GirlScript Summer of Code (GSSoC)**
 9. [Example Requests](#9-example-requests)
 10. [Docker Setup](#10-docker-setup)
 11. [Design Decisions](#11-design-decisions)
-12. [👥 Contributors](#-contributors)
+12. [Contributors](#12-contributors)
 
 
 ---
