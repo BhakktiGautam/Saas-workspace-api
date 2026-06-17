@@ -16,6 +16,7 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../config/database');
 const redis = require('../config/redis');
+const inMemoryBlacklist = require('../utils/inMemoryBlacklist');
 const config = require('../config');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { ConflictError, AuthenticationError, NotFoundError } = require('../utils/errors');
@@ -151,16 +152,30 @@ async function refreshTokens(rawRefreshToken) {
 // ─── Logout ───────────────────────────────────────────────────
 
 async function logout(accessToken, refreshToken, userId) {
-  // Blacklist the access token in Redis until it naturally expires
-  // TTL is derived from JWT_ACCESS_EXPIRES_IN (e.g. 900s for 15m)
+  // Blacklist access token
   const accessTtlMs = parseDurationToMs(config.jwt.accessExpiresIn);
-  await redis.set(`blacklist:${accessToken}`, '1', Math.ceil(accessTtlMs / 1000));
 
-  // If a refresh token was provided, revoke it in the DB
+  if (config.redis.enabled) {
+    await redis.set(
+      `blacklist:${accessToken}`,
+      '1',
+      Math.ceil(accessTtlMs / 1000)
+    );
+  } else {
+    inMemoryBlacklist.add(accessToken, accessTtlMs);
+  }
+
+  // Revoke refresh token
   if (refreshToken) {
     await prisma.refreshToken.updateMany({
-      where: { token: refreshToken, userId, revokedAt: null },
-      data: { revokedAt: new Date() },
+      where: {
+        token: refreshToken,
+        userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
     });
   }
 

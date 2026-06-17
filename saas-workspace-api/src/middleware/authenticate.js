@@ -15,6 +15,7 @@
 
 const prisma = require('../config/database');
 const redis = require('../config/redis');
+const inMemoryBlacklist = require('../utils/inMemoryBlacklist');
 const { verifyAccessToken, extractBearerToken } = require('../utils/jwt');
 const { AuthenticationError, NotFoundError } = require('../utils/errors');
 
@@ -29,8 +30,15 @@ async function authenticate(req, _res, next) {
     const decoded = verifyAccessToken(token);
 
     // Check Redis blacklist (populated on logout)
+    // Check Redis blacklist (populated on logout)
     const isBlacklisted = await redis.exists(`blacklist:${token}`);
+
     if (isBlacklisted) {
+      throw new AuthenticationError('Token has been revoked', 'TOKEN_REVOKED');
+    }
+
+    // Fallback blacklist when Redis is disabled
+    if (inMemoryBlacklist.has(token)) {
       throw new AuthenticationError('Token has been revoked', 'TOKEN_REVOKED');
     }
 
