@@ -285,7 +285,7 @@ npm run dev
 ├─────────────┤    1:N  ├──────────────────────┤  N:1    ├──────────────────┤
 │ id (PK)     │◄────────│ id (PK)              │────────►│ id (PK)          │
 │ email       │         │ organization_id (FK) │         │ name             │
-│ password_h  │         │ user_id (FK)         │         │ slug (UNIQUE)    │
+│  password_hash  │
 │ first_name  │         │ role (ENUM)          │         │ description      │
 │ last_name   │         │ joined_at            │         │ owner_id (FK)    │
 │ is_active   │         └──────────────────────┘         │ is_active        │
@@ -622,7 +622,7 @@ After running `npm run db:seed`:
 | MEMBER | carol@example.com | Password1 |
 
 ---
-## Built for Learning :
+## Built for Learning:
 >  This codebase is intentionally written as a learning resource.
 > Every non-trivial decision has an inline comment explaining **why**, not just **what**.
 > Great for developers learning JWT auth, RBAC, and production backend patterns.
