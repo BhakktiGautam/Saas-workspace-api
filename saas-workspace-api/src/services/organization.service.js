@@ -66,7 +66,12 @@ async function getUserOrganizations(userId, { page, limit }) {
 
   const [memberships, total] = await prisma.$transaction([
     prisma.organizationMember.findMany({
-      where: { userId },
+      where: {
+        userId,
+        organization: {
+          isActive: true,
+        },
+      },
       skip,
       take: limit,
       orderBy: { joinedAt: 'desc' },
@@ -78,7 +83,14 @@ async function getUserOrganizations(userId, { page, limit }) {
         },
       },
     }),
-    prisma.organizationMember.count({ where: { userId } }),
+    prisma.organizationMember.count({
+      where: {
+        userId,
+        organization: {
+          isActive: true,
+        },
+      },
+    }),
   ]);
 
   return {
@@ -251,9 +263,16 @@ async function inviteUser(orgId, { email, role }, invitedByUserId) {
 }
 
 async function acceptInvitation(token, userId) {
-  const invitation = await prisma.invitation.findUnique({ where: { token } });
+  const invitation = await prisma.invitation.findUnique({
+    where: { token },
+    include: {
+      organization: {
+        select: { isActive: true },
+      },
+    },
+  });
 
-  if (!invitation || invitation.status !== 'PENDING') {
+  if (!invitation || invitation.status !== 'PENDING' || !invitation.organization?.isActive) {
     throw new NotFoundError('Invitation');
   }
 
