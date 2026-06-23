@@ -141,8 +141,6 @@ Example:
 
 ## Middleware Layer
 
-## 🛡️ Middleware Layer
-
 Handles security, validation, and request processing.
 
 ###  Authentication
