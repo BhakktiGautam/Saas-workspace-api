@@ -7,7 +7,7 @@ Built with Node.js, Express, PostgreSQL, Prisma, Redis, and documented with Swag
 ---
 ##  Contributing
 
-Contributions are welcome! Whether you're fixing a bug, adding a feature, or improving the docs  we'd love your help.
+Contributions are welcome! Whether you're fixing a bug, adding a feature, or improving the docs, we'd love your help.
 
 Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
 
