@@ -110,12 +110,49 @@ Authorization: Bearer <your_access_token>
       },
     },
     tags: [
+      { name: 'Health', description: 'Service health and status' },
       { name: 'Auth', description: 'Authentication and user identity' },
       { name: 'Organizations', description: 'Organization CRUD and management' },
       { name: 'Members', description: 'Organization member management' },
       { name: 'Invitations', description: 'User invitation flow' },
       { name: 'Projects', description: 'Project management with RBAC' },
     ],
+    // Defined here (rather than via @openapi JSDoc) because /health lives
+    // outside the /api/{version} prefix assumed by the `servers` entry
+    // above, so it needs its own per-operation server override.
+    paths: {
+      '/health': {
+        get: {
+          tags: ['Health'],
+          summary: 'Check API health status',
+          description: 'Returns the service status. Does not require authentication.',
+          security: [],
+          servers: [
+            {
+              url: `http://localhost:${config.server.port}`,
+              description: 'Root (unversioned) server',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Service is healthy',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      status: { type: 'string', example: 'ok' },
+                      timestamp: { type: 'string', format: 'date-time' },
+                      version: { type: 'string', example: 'v1' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   // Glob for route files that contain @openapi JSDoc comments
   apis: ['./src/routes/*.js'],

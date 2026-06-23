@@ -79,6 +79,9 @@ app.use(
 app.use(`/api/${config.server.apiVersion}`, apiLimiter);
 
 // ── Health Check ──────────────────────────────────────────────
+// Documented in src/config/swagger.js (not via JSDoc here) because this
+// route lives outside the /api/{version} prefix that the Swagger servers
+// entry assumes, and needs its own per-operation `servers` override.
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), version: config.server.apiVersion });
 });
