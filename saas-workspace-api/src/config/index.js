@@ -98,7 +98,14 @@ const config = {
 
   app: {
     baseUrl: optional('APP_BASE_URL', 'http://localhost:3000'),
-  }
+  },
+
+  // ✅ NEW: Token cleanup configuration for refresh token rotation
+  tokenCleanup: {
+    enabled: optionalBool('TOKEN_CLEANUP_ENABLED', true),
+    batchSize: optionalInt('TOKEN_CLEANUP_BATCH_SIZE', 1000),
+    retentionDays: optionalInt('TOKEN_CLEANUP_RETENTION_DAYS', 30), // Keep revoked tokens for audit
+  },
 };
 
 module.exports = config;

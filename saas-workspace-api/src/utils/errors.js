@@ -58,12 +58,135 @@ class RateLimitError extends AppError {
   }
 }
 
+// ✅ NEW: Token-specific error classes for refresh token rotation
+
+/**
+ * TokenError - Base class for token-related errors
+ */
+class TokenError extends AppError {
+  constructor(message = 'Token operation failed', code = 'TOKEN_ERROR') {
+    super(message, 401, code);
+  }
+}
+
+/**
+ * TokenExpiredError - Thrown when a token has expired
+ */
+class TokenExpiredError extends TokenError {
+  constructor(message = 'Token has expired. Please refresh your tokens.', code = 'TOKEN_EXPIRED') {
+    super(message, 401, code);
+  }
+}
+
+/**
+ * TokenInvalidError - Thrown when a token is invalid
+ */
+class TokenInvalidError extends TokenError {
+  constructor(message = 'Invalid token provided.', code = 'TOKEN_INVALID') {
+    super(message, 401, code);
+  }
+}
+
+/**
+ * TokenRevokedError - Thrown when a token has been revoked
+ */
+class TokenRevokedError extends TokenError {
+  constructor(message = 'Token has been revoked. Please log in again.', code = 'TOKEN_REVOKED') {
+    super(message, 401, code);
+  }
+}
+
+/**
+ * TokenMissingError - Thrown when a token is required but not provided
+ */
+class TokenMissingError extends TokenError {
+  constructor(message = 'Token is required.', code = 'TOKEN_MISSING') {
+    super(message, 401, code);
+  }
+}
+
+/**
+ * RefreshTokenError - Thrown specifically for refresh token issues
+ */
+class RefreshTokenError extends AppError {
+  constructor(
+    message = 'Refresh token operation failed. Please log in again.',
+    code = 'REFRESH_TOKEN_ERROR',
+    statusCode = 401
+  ) {
+    super(message, statusCode, code);
+  }
+}
+
+/**
+ * AccountDeactivatedError - Thrown when user account is deactivated
+ */
+class AccountDeactivatedError extends AppError {
+  constructor(message = 'Your account has been deactivated. Please contact support.', code = 'ACCOUNT_DEACTIVATED') {
+    super(message, 403, code);
+  }
+}
+
+/**
+ * EmailNotVerifiedError - Thrown when email is not verified
+ */
+class EmailNotVerifiedError extends AppError {
+  constructor(
+    message = 'Please verify your email address before proceeding.',
+    code = 'EMAIL_NOT_VERIFIED',
+    statusCode = 403
+  ) {
+    super(message, statusCode, code);
+  }
+}
+
+/**
+ * TokenTheftDetectedError - Thrown when token theft is suspected
+ */
+class TokenTheftDetectedError extends AppError {
+  constructor(
+    message = 'Security alert: Possible token theft detected. All sessions have been revoked.',
+    code = 'TOKEN_THEFT_DETECTED',
+    statusCode = 401
+  ) {
+    super(message, statusCode, code);
+  }
+}
+
+/**
+ * BadRequestError - Thrown for general bad requests
+ */
+class BadRequestError extends AppError {
+  constructor(message = 'Invalid request. Please check your input.', code = 'BAD_REQUEST', details = null) {
+    super(message, 400, code, details);
+  }
+}
+
 module.exports = {
+  // Base error
   AppError,
+
+  // General errors
   ValidationError,
   AuthenticationError,
   AuthorizationError,
   NotFoundError,
   ConflictError,
   RateLimitError,
+  BadRequestError,
+
+  // Token errors
+  TokenError,
+  TokenExpiredError,
+  TokenInvalidError,
+  TokenRevokedError,
+  TokenMissingError,
+  RefreshTokenError,
+
+  // Account errors
+  AccountDeactivatedError,
+  EmailNotVerifiedError,
+
+  // Security errors
+  TokenTheftDetectedError,
 };

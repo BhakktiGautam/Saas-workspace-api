@@ -2,6 +2,8 @@
 
 /**
  * src/routes/auth.routes.js
+ * 
+ * Authentication routes with JWT token management and refresh token rotation
  */
 
 const express = require('express');
@@ -74,7 +76,11 @@ router.post('/login', authLimiter, validate(loginSchema), authController.login);
  * /auth/refresh:
  *   post:
  *     tags: [Auth]
- *     summary: Refresh access token using a refresh token
+ *     summary: Refresh access token using a refresh token (with rotation)
+ *     description: |
+ *       Issues a new access token and refresh token pair.
+ *       **The old refresh token is immediately revoked** and cannot be used again.
+ *       This implements refresh token rotation for enhanced security.
  *     requestBody:
  *       required: true
  *       content:
@@ -83,12 +89,52 @@ router.post('/login', authLimiter, validate(loginSchema), authController.login);
  *             type: object
  *             required: [refreshToken]
  *             properties:
- *               refreshToken: { type: string }
+ *               refreshToken: 
+ *                 type: string
+ *                 description: The current valid refresh token
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
  *       200:
- *         description: New token pair issued
+ *         description: New token pair issued (old refresh token is revoked)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       description: New access token
+ *                     refreshToken:
+ *                       type: string
+ *                       description: New refresh token (old one is revoked)
+ *                     user:
+ *                       type: object
+ *                       description: User profile
  *       401:
  *         description: Invalid or expired refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Refresh token not found or already revoked"
+ *                     code:
+ *                       type: string
+ *                       example: "INVALID_REFRESH_TOKEN"
  */
 router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
 
@@ -98,18 +144,44 @@ router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
  *   post:
  *     tags: [Auth]
  *     summary: Log out and revoke tokens
+ *     description: |
+ *       Revokes the refresh token and optionally blacklists the access token.
+ *       Once logged out, the refresh token cannot be used for new token requests.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required: [refreshToken]
  *             properties:
- *               refreshToken: { type: string }
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token to revoke
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
  *       200:
- *         description: Logged out
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Logged out successfully"
+ *       400:
+ *         description: Refresh token missing
+ *       401:
+ *         description: Not authenticated
  */
 router.post('/logout', authenticate, authController.logout);
 
@@ -128,6 +200,7 @@ router.post('/logout', authenticate, authController.logout);
  *         description: Not authenticated
  */
 router.get('/me', authenticate, authController.getMe);
+
 /**
  * @openapi
  * /auth/verify-email/{token}:
@@ -141,6 +214,7 @@ router.get('/me', authenticate, authController.getMe);
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Email verification token
  *     responses:
  *       200:
  *         description: Email verified successfully

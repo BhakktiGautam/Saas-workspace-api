@@ -18,31 +18,44 @@ const redis = require('../config/redis');
 const inMemoryBlacklist = require('../utils/inMemoryBlacklist');
 const { verifyAccessToken, extractBearerToken } = require('../utils/jwt');
 const { AuthenticationError, NotFoundError } = require('../utils/errors');
+const config = require('../config');
 
 async function authenticate(req, _res, next) {
   try {
+    // 1. Extract token from Authorization header
     const token = extractBearerToken(req.headers.authorization);
     if (!token) {
-      throw new AuthenticationError('No token provided');
+      throw new AuthenticationError('No token provided', 'TOKEN_MISSING');
     }
 
-    // Verify signature / expiry
-    const decoded = verifyAccessToken(token);
-
-    // Check Redis blacklist (populated on logout)
-    // Check Redis blacklist (populated on logout)
-    const isBlacklisted = await redis.exists(`blacklist:${token}`);
-
-    if (isBlacklisted) {
-      throw new AuthenticationError('Token has been revoked', 'TOKEN_REVOKED');
+    // 2. Verify signature / expiry
+    let decoded;
+    try {
+      decoded = verifyAccessToken(token);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new AuthenticationError('Access token expired', 'TOKEN_EXPIRED');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new AuthenticationError('Invalid access token', 'TOKEN_INVALID');
+      }
+      throw error;
     }
 
-    // Fallback blacklist when Redis is disabled
+    // 3. Check Redis blacklist (populated on logout)
+    if (config.redis.enabled) {
+      const isBlacklisted = await redis.exists(`blacklist:${token}`);
+      if (isBlacklisted) {
+        throw new AuthenticationError('Token has been revoked', 'TOKEN_REVOKED');
+      }
+    }
+
+    // 4. Fallback blacklist when Redis is disabled
     if (inMemoryBlacklist.has(token)) {
       throw new AuthenticationError('Token has been revoked', 'TOKEN_REVOKED');
     }
 
-    // Load user from DB — ensures deactivated accounts can't use old tokens
+    // 5. Load user from DB — ensures deactivated accounts can't use old tokens
     const user = await prisma.user.findUnique({
       where: { id: decoded.sub },
       select: {
@@ -52,16 +65,31 @@ async function authenticate(req, _res, next) {
         lastName: true,
         avatarUrl: true,
         isActive: true,
+        isEmailVerified: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
-    if (!user) throw new NotFoundError('User');
+    // 6. Validate user exists and is active
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
     if (!user.isActive) {
       throw new AuthenticationError('Account is deactivated', 'ACCOUNT_DEACTIVATED');
     }
 
+    // ✅ 7. Optional: Check if email is verified (if required)
+    // if (!user.isEmailVerified) {
+    //   throw new AuthenticationError('Please verify your email first', 'EMAIL_NOT_VERIFIED');
+    // }
+
+    // 8. Attach user and token to request
     req.user = user;
+    req.userId = user.id;
     req.token = token; // needed for logout blacklisting
+
     return next();
   } catch (err) {
     return next(err);

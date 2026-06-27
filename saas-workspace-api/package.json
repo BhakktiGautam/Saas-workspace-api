@@ -1,7 +1,7 @@
 {
   "name": "saas-workspace-api",
   "version": "1.0.0",
-  "description": "Production-style SaaS Team Workspace API with RBAC",
+  "description": "Production-style SaaS Team Workspace API with RBAC and Refresh Token Rotation",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -14,7 +14,12 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "test": "jest --runInBand",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "token:cleanup": "node scripts/cleanup-expired-tokens.js",
+    "token:cleanup:dry": "node scripts/cleanup-expired-tokens.js --dry-run",
+    "security:audit": "npm audit",
+    "security:audit:fix": "npm audit fix"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",
@@ -47,5 +52,28 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "keywords": [
+    "saas",
+    "workspace",
+    "api",
+    "rbac",
+    "jwt",
+    "authentication",
+    "refresh-token-rotation",
+    "nodejs",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Riya Kaurav",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/riya-kaurav/saas-workspace-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/riya-kaurav/saas-workspace-api/issues"
+  },
+  "homepage": "https://github.com/riya-kaurav/saas-workspace-api#readme"
 }
